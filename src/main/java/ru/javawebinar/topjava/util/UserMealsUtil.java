@@ -3,11 +3,9 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExceed;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.util.Arrays;
-import java.util.List;
+import java.time.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -19,13 +17,51 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,13,0), "Обед", 500),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,20,0), "Ужин", 510)
         );
-        getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000);
-//        .toLocalDate();
-//        .toLocalTime();
+        for (UserMealWithExceed each : getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000)){
+            System.out.println(each);
+        }
+
+//        .toLocalDate(); - приводим LocalDateTime к дате без времени
+//        .toLocalTime(); - приводим LocalDateTime к времени без даты
     }
+
+    public LocalDate toLocalDate(LocalDateTime localDateTime){
+        return LocalDate.of(localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDayOfMonth());
+    }
+
+    public LocalTime toLocalTime(LocalDateTime localDateTime){
+        return LocalTime.of(localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond());
+    }
+
+    public static void ascSorting(List<UserMeal> mealList){ // Может быть пригодится, сортировка год-месяц-час-минута
+        mealList.sort(Comparator.comparingInt((UserMeal o) -> o.getDateTime().getYear())
+                .thenComparing((UserMeal o) -> o.getDateTime().getMonth())
+                .thenComparing((UserMeal o) -> o.getDateTime().getHour())
+                .thenComparing((UserMeal o) -> o.getDateTime().getMinute()));
+    }
+
 
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         // TODO return filtered list with correctly exceeded field
-        return null;
+        Map<LocalDate, Integer> calsPerDay = new HashMap<>(); // Собираю мапу дата-калории
+        for (UserMeal each : mealList){ // Если дата уже в мапе - сложить калории, иначе создать новую с данными калориями
+            if (calsPerDay.containsKey(each.getDateTime().toLocalDate())){
+                calsPerDay.put(each.getDateTime().toLocalDate(), calsPerDay.get(each.getDateTime().toLocalDate())+each.getCalories());
+            } else {
+                calsPerDay.put(each.getDateTime().toLocalDate(), each.getCalories());
+            }
+        }
+        List<UserMealWithExceed> exceedList = new ArrayList<>(); // Лист для вывода отфильтрованных записей
+        for (Map.Entry<LocalDate, Integer> map : calsPerDay.entrySet()){
+     //       System.out.println(map.getKey()+" "+map.getValue());
+            if (map.getValue() > caloriesPerDay){
+                for (UserMeal each : mealList){
+                    if (each.getDateTime().toLocalDate().equals(map.getKey()) && each.getDateTime().toLocalTime().isAfter(startTime) && each.getDateTime().toLocalTime().isBefore(endTime)){
+                        exceedList.add(new UserMealWithExceed(each.getDateTime(), each.getDescription(), each.getCalories(), true));
+                    }
+                }
+            }
+        }
+        return exceedList;
     }
 }

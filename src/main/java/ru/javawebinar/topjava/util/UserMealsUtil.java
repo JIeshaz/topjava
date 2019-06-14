@@ -3,9 +3,11 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExceed;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -13,6 +15,9 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30,10,0), "Завтрак", 500),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30,13,0), "Обед", 1000),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30,20,0), "Ужин", 500),
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 1,10,0), "Завтрак", 1000),
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 1,11,0), "Обед", 700),
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 1,19,0), "Ужин", 1000),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,10,0), "Завтрак", 1000),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,13,0), "Обед", 500),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31,20,0), "Ужин", 510)
@@ -32,14 +37,6 @@ public class UserMealsUtil {
     public LocalTime toLocalTime(LocalDateTime localDateTime){
         return LocalTime.of(localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond());
     }
-
-    public static void ascSorting(List<UserMeal> mealList){ // Может быть пригодится, сортировка год-месяц-час-минута
-        mealList.sort(Comparator.comparingInt((UserMeal o) -> o.getDateTime().getYear())
-                .thenComparing((UserMeal o) -> o.getDateTime().getMonth())
-                .thenComparing((UserMeal o) -> o.getDateTime().getHour())
-                .thenComparing((UserMeal o) -> o.getDateTime().getMinute()));
-    }
-
 
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         // TODO return filtered list with correctly exceeded field
@@ -64,4 +61,5 @@ public class UserMealsUtil {
         }
         return exceedList;
     }
+
 }
